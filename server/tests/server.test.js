@@ -10,7 +10,9 @@ const todos = [{
 	text: 'First todo'
 }, {
 	_id: new ObjectID(),
-	text: 'Second todo'
+	text: 'Second todo',
+	completed: true,
+	completedAt: 123
 }];
 
 beforeEach((done) => {
@@ -131,5 +133,57 @@ describe('Delete/todos/id', () => {
 		.expect((res) => {
 			expect(res.body).toEqual({});
 		}).end(done);
+	});
+});
+
+describe('Patch.todos/id', () => {
+
+	it('should update the todo', (done) => {
+		var id = todos[0]._id.toString();
+		var newText = 'Updates made in test';
+
+		request(app)
+		.patch(`/todos/${id}`)
+		.send({
+			text: newText,
+			completed: true,
+		})
+		.expect(200)
+		.expect((res) => {
+			expect(res.body.todo._id).toEqual(id);
+		}).end((err, res) => {
+			if (err) {
+				return done(err);
+			}
+
+			Todo.findById(id).then((todo) => {
+				expect(todo.text).toEqual(newText);
+				expect(todo.completed).toEqual(true);
+				done();
+			}).catch((err) => done(err))
+		});
+	});
+
+	it('should clear completedAt when todo is not completed', (done) => {
+		var id = todos[1]._id.toString();
+
+		request(app)
+		.patch(`/todos/${id}`)
+		.send({
+			completed: false
+		})
+		.expect(200)
+		.expect((res) => {
+			expect(res.body.todo._id.toString()).toEqual(id);
+		}).end((err, res) => {
+			if (err) {
+				return done(err);
+			}
+
+			Todo.findById(id).then((todo) => {
+				expect(todo.completedAt).toEqual(null);
+				done();
+			}).catch((err) => done(err));
+		});
 	});
 });
