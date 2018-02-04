@@ -19,23 +19,24 @@ beforeEach((done) => {
 	}).then(() => done());
 });
 
-describe('POST /todos', () => {
+describe('POST/todos', () => {
 	it('Should create a new todo', (done) => {
+		var text = 'Todo for test';
 		request(app)
 		.post('/todos')
-		.send(todos[0])
+		.send({text})
 		.expect(200)
 		.expect((res) => {
-			expect(res.body.text).toBe(todos[0].text)
+			expect(res.body.text).toEqual(text)
 		})
 		.end((err, res) => {
 			if (err) {
 				return done(err);
 			}
 
-			Todo.find({text: todos[0].text}).then((todos) => {
+			Todo.find({text}).then((todos) => {
 				expect(todos.length).toBe(1);
-				expect(todos[0].text).toBe(text);
+				expect(todos[0].text).toEqual(text);
 				done();
 			}).catch((err) => done(err));
 		});
@@ -60,7 +61,7 @@ describe('POST /todos', () => {
 });
 
 
-describe('Get /todos', () => {
+describe('Get/todos', () => {
 	it('should get all todos', (done) => {
 		request(app)
 		.get('/todos')
@@ -92,19 +93,43 @@ describe('Get/todos/id', () => {
 
 describe('Delete/todos/id', () => {
 	it('should delete a todo by id', (done) => {
+		var id = todos[0]._id.toString();
 		request(app)
-		.delete(`/todos/${todos[0]._id.toString()}`)
+		.delete(`/todos/${id}`)
 		.expect(200)
 		.expect((res) => {
-			expect(res.body.todo.text).toBe(todo[0].text)
-		}).end(done);
+			expect(res.body.todo.text).toEqual(todos[0].text)
+		}).end((err, res) => {
+			if (err) {
+				return done(err);
+			}
+
+			Todo.findById(id).then((todo) => {
+				expect(todo).toBe(null);
+				done();
+			}).catch((err) => done(err));
+		});
 	});
 
 	it('should return error 404 if todo is not found', (done) => {
+		var id = new ObjectID().toString();
 
+		request(app)
+		.delete(`/todos/${id}`)
+		.expect(404)
+		.expect((res) => {
+			expect(res.body).toEqual({});
+		}).end(done);
 	});
 
 	it('should return error 404 id id is invalid', (done) => {
+		var id = '123';
 
+		request(app)
+		.delete(`/todos/${id}`)
+		.expect(404)
+		.expect((res) => {
+			expect(res.body).toEqual({});
+		}).end(done);
 	});
 });

@@ -20,7 +20,6 @@ app.post('/todos', (req, res) => {
 	}).catch((err) => {
 		res.status(400).send(err);
 	});
-	console.log(req.body);
 });
 
 app.get('/todos', (req, res) => {
