@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
 
-var url = 'mongodb://admin:password@ds223738.mlab.com:23738/bokaderohit98-todoapp'
+var url = process.env.MONGOLAB_URI || 'mongodb://localhost:27017/TodoApp';
 mongoose.promise = global.promise;
 mongoose.connect(url);
 

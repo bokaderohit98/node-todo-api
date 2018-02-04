@@ -21,21 +21,19 @@ beforeEach((done) => {
 
 describe('POST /todos', () => {
 	it('Should create a new todo', (done) => {
-		var text = 'Test todo text';
-
 		request(app)
 		.post('/todos')
-		.send({text})
+		.send(todos[0])
 		.expect(200)
 		.expect((res) => {
-			expect(res.body.text).toBe(text)
+			expect(res.body.text).toBe(todos[0].text)
 		})
 		.end((err, res) => {
 			if (err) {
 				return done(err);
 			}
 
-			Todo.find({text}).then((todos) => {
+			Todo.find({text: todos[0].text}).then((todos) => {
 				expect(todos.length).toBe(1);
 				expect(todos[0].text).toBe(text);
 				done();
@@ -89,5 +87,24 @@ describe('Get/todos/id', () => {
 		.get('/todos/1234')
 		.expect(404)
 		.end(done);
+	});
+});
+
+describe('Delete/todos/id', () => {
+	it('should delete a todo by id', (done) => {
+		request(app)
+		.delete(`/todos/${todos[0]._id.toString()}`)
+		.expect(200)
+		.expect((res) => {
+			expect(res.body.todo.text).toBe(todo[0].text)
+		}).end(done);
+	});
+
+	it('should return error 404 if todo is not found', (done) => {
+
+	});
+
+	it('should return error 404 id id is invalid', (done) => {
+
 	});
 });
