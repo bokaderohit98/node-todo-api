@@ -4,22 +4,10 @@ const {ObjectID} = require('mongodb');
 
 const {app} = require('./../server');
 const {Todo} = require('./../models/todo');
+const {populateTodos, todos, users, populateUsers} = require('./seed/seed');
 
-const todos = [{
-	_id: new ObjectID(),
-	text: 'First todo'
-}, {
-	_id: new ObjectID(),
-	text: 'Second todo',
-	completed: true,
-	completedAt: 123
-}];
-
-beforeEach((done) => {
-	Todo.remove({}).then(() => {
-		return Todo.insertMany(todos);
-	}).then(() => done());
-});
+beforeEach(populateTodos);
+beforeEach(populateUsers);
 
 describe('POST/todos', () => {
 	it('Should create a new todo', (done) => {
@@ -185,5 +173,77 @@ describe('Patch.todos/id', () => {
 				done();
 			}).catch((err) => done(err));
 		});
+	});
+});
+
+
+describe('GET /users/me', () => {
+	it('should return user if authenticated', (done) => {
+		request(app)
+		.get('/users/me')
+		.set('x-auth', users[0].tokens[0].token)
+		.expect(200)
+		.expect((res) => {
+			expect(res.body._id).toEqual(users[0]._id.toString());
+			expect(res.body.email).toEqual(users[0].email.toString());
+		}).end(done);
+	});
+
+	it('should return 401 if not authenticated', (done) => {
+		request(app)
+		.get('/users/me')
+		.expect(401)
+		.expect((res) => {
+			expect(res.body).toEqual({});
+		}).end(done);
+	});
+});
+
+describe('Post /users', () => {
+
+	it('should create user', (done) => {
+		var email = 'example@asd.com';
+		var password = '1234567789';
+
+		request(app)
+		.post('/users')
+		.send({
+			email,
+			password
+		})
+		.expect(200)
+		.expect((res) => {
+			expect(res.headers['x-auth']).toBeTruthy();
+			expect(res.body._id).toBeTruthy();
+			expect(res.body.email).toBe(email)
+		}).end(done);
+	});
+
+	it('should return validation error', (done) => {
+		var email = 'asssd';
+		var password = 'ffjdfjf';
+
+		request(app)
+		.post('/users')
+		.send({
+			email,
+			password
+		})
+		.expect(400)
+		.end(done);
+	});
+
+	it('should not create user if email in use', (done) => {
+		var email = users[0].email;
+		var password = '1234567789';
+
+		request(app)
+		.post('/users')
+		.send({
+			email,
+			password
+		})
+		.expect(400)
+		.end(done);
 	});
 });

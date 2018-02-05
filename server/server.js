@@ -96,7 +96,7 @@ app.patch('/todos/:id', (req, res) => {
 	})
 });
 
-app.post('/user', (req, res) => {
+app.post('/users', (req, res) => {
 	var user = new User(_.pick(req.body, ['email', 'password']));
 
 	user.save().then(() => {
@@ -109,7 +109,7 @@ app.post('/user', (req, res) => {
 });
 
 
-app.get('/user/me', authenticate, (req, res) => {
+app.get('/users/me', authenticate, (req, res) => {
 	res.send(req.user);
 });
 
