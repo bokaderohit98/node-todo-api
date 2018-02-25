@@ -1,0 +1,12 @@
+{
+  "test": {
+    "PORT": "port",
+    "MONGODB_URI": "url of local development database",
+    "JWT_SECRET": "any secret key to encrypt password"
+  },
+  "development": {
+      "PORT": "port",
+      "MONGODB_URI": "url of local development database",
+      "JWT_SECRET": "any secret key to encrypt password"
+  }
+}
